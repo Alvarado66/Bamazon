@@ -50,14 +50,15 @@ function purchasePrompt() {
         },
 
     ]).then(function (itemPicked) {
-        var IDrequested = itemPicked.ID;
+        console.log(itemPicked)
+        var IDrequested = itemPicked.ID || 1;
         var quantityNeeded = itemPicked.Quantity;
         customerOrder(IDrequested, quantityNeeded);
     });
 };
 
 function customerOrder(ID, quantityNeeded) {
-    connection.query('Select * FROM products WHERE item_id = ' + ID, function (err, res) {
+    connection.query('Select * FROM products WHERE item_id = ? ', [ID], function (err, res) {
         if (err) {
             console.log(err)
         };
@@ -65,13 +66,32 @@ function customerOrder(ID, quantityNeeded) {
         if (quantityNeeded <= res[0].stock_quantity) {
             var orderTotal = res[0].price * quantityNeeded;
 
-            console.log("Your total for " + quantityNeeded + " " + res[0].product_name + " is " + " " + orderTotal + ",Thanks for shopping with us!");
-        }
-        else {
+            console.log("Your total for " + quantityNeeded + " " + res[0].product_name + " is" + " " + orderTotal + ", Thanks for shopping with us!");
+        } else {
             console.log("We're sorry, we do not have enough of the product!");
         };
+        const amtLeft = res[0].stock_quantity - quantityNeeded;
+        updateQuantity(amtLeft, ID);
         displayProducts();
+
+
     });
+    function updateQuantity(amtLeft, ID) {
+        connection.query(
+            "UPDATE products SET ? WHERE ?",
+            [
+                {
+                    stock_quantity: amtLeft
+                },
+                {
+                    item_id: ID
+                }
+            ]
+        )
+    }
 };
+
+
+
 
 displayProducts();
