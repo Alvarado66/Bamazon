@@ -14,6 +14,6 @@
     mySql 
 
 ## ScreenShots 
-![GitHub Logo](/images/logo.png)
-Format: ![Alt Text](url)
+![](images/screenshot1.png)
+
     
