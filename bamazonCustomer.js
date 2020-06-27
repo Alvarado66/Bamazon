@@ -10,46 +10,11 @@ var connection = mysql.createConnection({
     database: "bamazon_db",
 });
 
-var quantityPrompt = function (itemID) {
-    inquirer.prompt([
-        {
-            type: "input",
-            message: "How many would you like to buy?",
-            name: "quantity",
-        }
-    ]).then(function (choices) {
-        var quantityPicked = choices.quantity;
-        var quantityID = choices.itemID;
-        connection.query(
-            "Update products set ? WHERE ?",
-            [
-                {
-                    stock_quantity: quantityPicked
-                },
-                {
-                    itemID: quantityID
-                }
-            ]
-        )
-    });
-};
+connection.connect(function (err) {
+    if (err) throw err;
+    console.log("You're connected as ID:" + connection.threadId);
+});
 
-
-
-let purchasePrompt = function () {
-    inquirer.prompt([
-        {
-            type: "input",
-            message: "What item would you like to purchase?",
-            name: "itemID",
-        }
-    ]).then(function (choices) {
-        const itemID = parseInt(choices.itemID);
-        console.log(itemID);
-        quantityPrompt(itemID)
-    })
-
-}
 let displayProducts = function () {
     var query = "Select * FROM products";
     connection.query(query, function (err, res) {
@@ -69,27 +34,44 @@ let displayProducts = function () {
 
 }
 
-connection.connect(function (err) {
-    if (err) throw err;
-    console.log("You're connected as ID:" + connection.threadId);
-    displayProducts();
-});
+function purchasePrompt() {
+    inquirer.prompt([
+        {
+            name: "ID",
+            type: "input",
+            message: "What would you like to order?(Item Id)",
 
-// let displayProducts = function (){
-//     var query = "Select * FROM products";
-//     connection.query(query, function(err, res){
-//         if(err) throw err;
-//         var displayTable = new Table ({
-//             head: ["Item ID", "Product Name", "Category", "Price", "Quantity"],
-//             colWidth: [10,25,25,10,14]
-//         });
-//         for(var i = 0; i < res.length; i++){
-// 			displayTable.push(
-// 				[res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
-// 				);
-// 		}
-// 		console.log(displayTable.toString());
-// 		purchasePrompt();
-// 	});
+        },
+        {
+            name: "Quantity",
+            type: "input",
+            message: "How many items would you like to purchase?",
 
-// }
+        },
+
+    ]).then(function (itemPicked) {
+        var IDrequested = itemPicked.ID;
+        var quantityNeeded = itemPicked.Quantity;
+        customerOrder(IDrequested, quantityNeeded);
+    });
+};
+
+function customerOrder(ID, quantityNeeded) {
+    connection.query('Select * FROM products WHERE item_id = ' + ID, function (err, res) {
+        if (err) {
+            console.log(err)
+        };
+
+        if (quantityNeeded <= res[0].stock_quantity) {
+            var orderTotal = res[0].price * quantityNeeded;
+
+            console.log("Your total for " + quantityNeeded + " " + res[0].product_name + " is " + " " + orderTotal + ",Thanks for shopping with us!");
+        }
+        else {
+            console.log("We're sorry, we do not have enough of the product!");
+        };
+        displayProducts();
+    });
+};
+
+displayProducts();

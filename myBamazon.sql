@@ -6,13 +6,15 @@ USE bamazon_db;
 
 CREATE TABLE products
 (
-    item_id INT (5) NOT NULL AUTO_INCREMENT,
+    item_id INT (5) NOT NULL,
     product_name VARCHAR (100) NOT NULL,
     department_name VARCHAR (50) NOT NULL,
 	price INT default 0,
     stock_quantity INT NULL,
     primary key (item_id)
 );
+
+Select * FROM products;
 
     INSERT INTO products (product_name, department_name, price, stock_quantity)
     VALUES ("Computer", "Electronics", 500, 3);
