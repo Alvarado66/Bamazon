@@ -91,7 +91,4 @@ function customerOrder(ID, quantityNeeded) {
     }
 };
 
-
-
-
 displayProducts();
